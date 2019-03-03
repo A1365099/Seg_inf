@@ -32,23 +32,40 @@ class Proyect{
 		}
 
 	}
+	public static String getAESCTR(String input, String key){
+		
+		byte[] k =  DatatypeConverter.parseHexBinary(key);
+		String iv = "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff";
+		byte[] ivBytes =  DatatypeConverter.parseHexBinary(iv);
+		try{
+		//	byte [] ivBytes = iv.getBytes();
+			Key keya = new SecretKeySpec(k, "AES");		
+			IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+			Cipher c1 = Cipher.getInstance("AES/CTR/NoPadding");	
+			c1.init(Cipher.ENCRYPT_MODE, keya,ivSpec);
+
+			byte[] msg = c1.doFinal(DatatypeConverter.parseHexBinary(input));
+	        BigInteger no = new BigInteger(1, msg); 
+	        String ciphertext = no.toString(16).toUpperCase();
+	        return ciphertext;
+
+
+		}catch(Exception e){
+			System.out.println("Erros: "+e);
+			return null;
+		}
+	}
 
 	public static String getAES256(String input, String key){
-		SecureRandom random = new SecureRandom();
+		
 		byte[] k =  DatatypeConverter.parseHexBinary(key);
-		byte bytes[] = new byte[20];
-    	random.nextBytes(bytes);
-    	byte[] saltBytes = bytes;
+		
 		try{
-			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-			PBEKeySpec  spec = new PBEKeySpec(key.toCharArray(), saltBytes, 100, 256);
-			//SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-			SecretKey tmp = factory.generateSecret(spec);
-			SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
-			Cipher c = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-			c.init(Cipher.ENCRYPT_MODE, secretKey);
+			Key keya = new SecretKeySpec(k, "AES");		
+			Cipher c1 = Cipher.getInstance("AES");	
+			c1.init(Cipher.ENCRYPT_MODE, keya);
 
-			byte[] msg = c.doFinal(DatatypeConverter.parseHexBinary(input));
+			byte[] msg = c1.doFinal(DatatypeConverter.parseHexBinary(input));
 	        BigInteger no = new BigInteger(1, msg); 
 	        String ciphertext = no.toString(16).toUpperCase();
 	        return ciphertext;
@@ -245,16 +262,19 @@ class Proyect{
 
 				
 				case 1: //algo = "DES";
-						String keyBC, plt, keyA2, pltA2;
+						String keyBC, plt, keyA2, pltA2,keyAC,pltAC;
 						keyA2 = "8000000000000000000000000000000000000000000000000000000000000000";
 						pltA2 = "0000000000000000000000000000000000000000000000000000000000000000";
+						keyAC ="2b7e151628aed2a6abf7158809cf4f3c";
+						pltAC="6bc1bee22e409f96e93d7e117393172a";
 						keyBC = "8000000000000000";
 						plt = "0000000000000000";
 
 						System.out.println("\n"); 
 						System.out.println("             String                     key                          DES                         AES              AES256\n");
 						System.out.println("Vector1     "+plt+"     "+keyBC+"           "+getDES(plt,keyBC)+"       "+getAES(plt,keyBC)+"          "+getAES256(pltA2,keyA2));
-
+						System.out.println("\n");
+						System.out.println("AESCTR = "+getAESCTR(pltAC,keyAC));
 				break;
 				case 2: String text = "";
 						
@@ -267,7 +287,7 @@ class Proyect{
 						
 						System.out.println("\n");
 						System.out.println("             String                        MD5                       SHA-1                                  SHA-2 \n");
-						System.out.println("Vector 1    "+text+"          "+getMd5(text)+"    "+getSHA1(text)+"     "+getSHA2(text));	
+						System.out.println("Vector 2    "+text+"          "+getMd5(text)+"    "+getSHA1(text)+"     "+getSHA2(text));	
 						System.out.println("                                 MD5 time: "+timeMd+"ms                    SHA-1 time: "+timeS1+"ms                       SHA-2 time: "+timeS2+"ms\n");
 
 				break;
